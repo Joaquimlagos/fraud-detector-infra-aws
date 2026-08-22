@@ -1,0 +1,27 @@
+# Sobe um LocalStack local com os serviços usados pelo projeto:
+# DynamoDB, SQS, SNS, Lambda, IAM, STS e CloudWatch Logs.
+#
+# Uso:
+#   docker compose -f docker-compose.localstack.yml up -d
+#   docker compose -f docker-compose.localstack.yml down       # para sem apagar dado
+#   docker compose -f docker-compose.localstack.yml down -v    # apaga tudo (reset limpo)
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: fraud-detector-localstack
+    ports:
+      - "4566:4566" # endpoint único (edge) para todos os serviços
+    environment:
+      - SERVICES=dynamodb,sqs,sns,lambda,iam,sts,logs
+      - DEBUG=0
+      - LAMBDA_EXECUTOR=docker
+      - PERSISTENCE=1 # mantém dado entre restarts do container (não do docker compose down -v)
+    volumes:
+      - "./.localstack/data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock" # necessário para o LocalStack rodar Lambdas em containers
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

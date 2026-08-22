@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "environment" {
   description = "Ambiente (dev, prod)"
   type        = string
-  
+
   validation {
     condition     = contains(["dev", "prod"], var.environment)
     error_message = "Environment deve ser 'dev' ou 'prod'."
@@ -15,14 +15,13 @@ variable "environment" {
 }
 
 variable "project_name" {
-  description = "Nome do projeto"
+  description = "Nome do projeto, usado como prefixo em todos os recursos para evitar colisão de nomes com outros projetos na mesma conta."
   type        = string
   default     = "fraud-detector"
 }
 
 variable "alert_email" {
-  description = "Email para receber alertas de fraude (apenas produção)"
+  description = "Email para receber alertas de fraude. Ativo em todos os ambientes (inclusive dev) para permitir validar o fluxo ponta a ponta antes de produção."
   type        = string
-  default     = "alerts@example.com"
   sensitive   = true
 }

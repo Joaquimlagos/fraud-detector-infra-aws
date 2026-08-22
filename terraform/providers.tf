@@ -1,16 +1,28 @@
 terraform {
+  required_version = ">= 1.7"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4"
+    }
   }
 }
 
-# Provider para AWS Real (produção)
+# Single provider block. To point Terraform at LocalStack instead of the
+# real AWS, copy local_override.tf.example -> local_override.tf (git-ignored).
+# Terraform automatically merges *_override.tf files into matching blocks
+# defined elsewhere, so there is never more than one active "aws" provider —
+# no risk of a resource silently going to the wrong target because a
+# provider alias was forgotten on it.
+# https://developer.hashicorp.com/terraform/language/files/override
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = var.project_name
@@ -20,23 +32,3 @@ provider "aws" {
   }
 }
 
-# Provider para LocalStack (desenvolvimento local)
-provider "aws" {
-  alias                       = "localstack"
-  region                      = "us-east-1"
-  access_key                  = "test"
-  secret_key                  = "test"
-  skip_credentials_validation = true
-  skip_requesting_account_id  = true
-  skip_metadata_api_check     = true
-  
-  endpoints {
-    dynamodb = "http://localhost:4566"
-    sqs      = "http://localhost:4566"
-    sns      = "http://localhost:4566"
-    lambda   = "http://localhost:4566"
-    iam      = "http://localhost:4566"
-    s3       = "http://localhost:4566"
-    cloudwatch = "http://localhost:4566"
-  }
-}
