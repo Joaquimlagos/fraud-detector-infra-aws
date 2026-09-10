@@ -1,0 +1,22 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+*_override.tf
+!*_override.tf.example
+
+.localstack/
+*.log
+
+# Local tools and operating-system files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
