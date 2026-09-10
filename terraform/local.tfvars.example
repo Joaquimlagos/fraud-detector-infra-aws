@@ -1,5 +1,3 @@
-# Valores para rodar terraform apply -var-file=local.tfvars contra o
-# LocalStack. Copie para local.tfvars (git-ignored) e ajuste se precisar.
 environment  = "dev"
 aws_region   = "us-east-1"
 project_name = "fraud-detector"

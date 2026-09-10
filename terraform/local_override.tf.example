@@ -1,24 +1,3 @@
-# ============================================
-# LOCALSTACK OVERRIDE (desenvolvimento local)
-# ============================================
-#
-# Como usar:
-#   cp local_override.tf.example local_override.tf
-#   docker compose -f ../docker-compose.localstack.yml up -d
-#   terraform init
-#   terraform apply -var-file=local.tfvars
-#
-# Terraform mescla automaticamente qualquer arquivo *_override.tf com os
-# blocos definidos em outros .tf do mesmo diretório. Isso significa que
-# este arquivo redefine o único provider "aws" já declarado em
-# providers.tf — não existem dois providers concorrentes, então nenhum
-# recurso corre o risco de "esquecer" de apontar pro LocalStack.
-#
-# https://developer.hashicorp.com/terraform/language/files/override
-#
-# local_override.tf (sem .example) fica no .gitignore — nunca é commitado,
-# porque só faz sentido na sua máquina.
-
 provider "aws" {
   region                      = "us-east-1"
   access_key                  = "test"

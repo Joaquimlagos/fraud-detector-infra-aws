@@ -1,8 +1,3 @@
-# ============================================
-# AWS DYNAMODB
-# ============================================
-
-# Tabela de Usuários
 resource "aws_dynamodb_table" "users" {
   name         = "${var.project_name}-users-${var.environment}"
   billing_mode = "PAY_PER_REQUEST"
@@ -23,15 +18,10 @@ resource "aws_dynamodb_table" "users" {
   }
 }
 
-# Tabela de Transações
 resource "aws_dynamodb_table" "transactions" {
   name         = "${var.project_name}-transactions-${var.environment}"
   billing_mode = "PAY_PER_REQUEST"
 
-  # FIX (item 6): transactionId sozinho como hash_key. Ele já é único
-  # globalmente (UUID gerado pela API), então um range_key composto com
-  # userId não agregava nada — só forçava toda leitura por transactionId
-  # a também informar userId sem necessidade real.
   hash_key = "transactionId"
 
   attribute {
@@ -49,10 +39,6 @@ resource "aws_dynamodb_table" "transactions" {
     type = "S"
   }
 
-  # FIX (item 5): GSI agora tem range_key (occurredAt), permitindo Query
-  # com BETWEEN direto no banco para regras de velocidade/padrão
-  # ("transações do usuário X nos últimos N minutos"), em vez de trazer
-  # o histórico inteiro do usuário e filtrar na aplicação.
   global_secondary_index {
     name            = "userId-occurredAt-index"
     hash_key        = "userId"

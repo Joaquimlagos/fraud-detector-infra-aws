@@ -1,4 +1,3 @@
-# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
@@ -7,9 +6,17 @@
 crash.log
 crash.*.log
 
-# Override files (LocalStack) — nunca commitados, só locais
 *_override.tf
 !*_override.tf.example
 
-# Dado persistido do LocalStack
 .localstack/
+*.log
+
+# Local tools and operating-system files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

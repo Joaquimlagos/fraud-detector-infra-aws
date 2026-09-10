@@ -1,8 +1,3 @@
-# ============================================
-# OUTPUTS
-# ============================================
-
-# DynamoDB
 output "users_table_name" {
   description = "Nome da tabela de usuários"
   value       = aws_dynamodb_table.users.name
@@ -13,7 +8,6 @@ output "transactions_table_name" {
   value       = aws_dynamodb_table.transactions.name
 }
 
-# SQS
 output "transaction_queue_url" {
   description = "URL da fila de transações"
   value       = aws_sqs_queue.transactions.url
@@ -29,7 +23,6 @@ output "transaction_dlq_url" {
   value       = aws_sqs_queue.transaction_dlq.url
 }
 
-# SNS
 output "fraud_alerts_topic_arn" {
   description = "ARN do tópico de alertas de fraude"
   value       = aws_sns_topic.fraud_alerts.arn

@@ -24,16 +24,16 @@ Este repositório **não contém** a infraestrutura específica da Lambda (IAM r
 
 ```
 terraform/
-├── dynamodb.tf                    # tabelas users e transactions
-├── sqs.tf                          # fila principal + DLQ
-├── sns.tf                           # tópico de alertas + assinatura de e-mail
-├── providers.tf                      # provider AWS único + versões exigidas
-├── variables.tf                       # parâmetros (region, environment, project_name, alert_email)
-├── outputs.tf                          # valores expostos após o apply (URLs, ARNs, nomes)
-├── terraform.tfvars.example             # modelo para deploy real — copiar para terraform.tfvars
-├── local.tfvars.example                  # modelo para uso local — copiar para local.tfvars
-└── local_override.tf.example              # modelo do override de provider para LocalStack
-docker-compose.localstack.yml         # sobe o LocalStack usado tanto por este repo quanto pelo fraud-detector-lambda
+├── dynamodb.tf
+├── sqs.tf
+├── sns.tf
+├── providers.tf
+├── variables.tf
+├── outputs.tf
+├── terraform.tfvars.example
+├── local.tfvars.example
+└── local_override.tf.example
+docker-compose.localstack.yml
 ```
 
 ## Deploy para AWS real
@@ -43,10 +43,9 @@ Pré-requisitos: credenciais AWS configuradas (`aws configure` ou variáveis de 
 ```bash
 cd terraform
 cp terraform.tfvars.example terraform.tfvars
-# edite terraform.tfvars com seus valores reais (principalmente alert_email)
 
 terraform init
-terraform plan -var-file=terraform.tfvars    # leia o plano com atenção antes de aplicar
+terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
 
@@ -59,15 +58,12 @@ Depois do apply, confirme a assinatura do SNS — chega um e-mail com link de co
 Todo o Terraform deste repositório roda igual contra o LocalStack ou contra a AWS real — o que muda é só a presença ou ausência do arquivo `local_override.tf`.
 
 ```bash
-# 1. Sobe o LocalStack
 docker compose -f docker-compose.localstack.yml up -d
 
-# 2. Ativa o override do provider (nunca commitado — fica só na sua máquina)
 cd terraform
 cp local_override.tf.example local_override.tf
 cp local.tfvars.example local.tfvars
 
-# 3. Aplica contra o LocalStack
 terraform init
 terraform apply -var-file=local.tfvars
 ```
