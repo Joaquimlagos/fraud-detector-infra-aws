@@ -1,0 +1,17 @@
+services:
+  localstack:
+    image: localstack/localstack:4.8.1
+    container_name: fraud-detector-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb,sqs,sns,iam,sts,logs,lambda
+      - DEBUG=0
+    volumes:
+      - "./.localstack/data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
