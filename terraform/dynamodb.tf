@@ -10,7 +10,7 @@ resource "aws_dynamodb_table" "users" {
 
   point_in_time_recovery {
     enabled = var.environment == "prod" ? true : false
-  }
+  } 
 
   tags = {
     Name    = "${var.project_name}-users-${var.environment}"

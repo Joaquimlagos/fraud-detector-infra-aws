@@ -2,7 +2,12 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+*.tfvars.json
+*.tfplan
+*.tfplan.*
 !*.tfvars.example
+*.pem
+*.key
 crash.log
 crash.*.log
 
