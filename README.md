@@ -1,26 +1,26 @@
 # fraud-detector-infra-aws
 
-Infraestrutura como código (Terraform) para os recursos AWS compartilhados do sistema **fraud-detector** — um projeto de portfólio demonstrando Java + AWS + arquitetura orientada a eventos + processamento assíncrono + persistência NoSQL + notificações desacopladas.
+Infrastructure as code (Terraform) for the shared AWS resources of the **fraud-detector** system - a portfolio project demonstrating Java + AWS + event-driven architecture + asynchronous processing + NoSQL persistence + decoupled notifications.
 
-## Onde este repositório se encaixa
+## Where This Repository Fits
 
-O sistema é dividido em três repositórios:
+The system is divided into three repositories:
 
-| Repositório | Responsabilidade |
+| Repository | Responsibility |
 |---|---|
-| `fraud-detector-api` | API Java/Spring Boot. Valida transações e publica no SQS. **Nunca** decide se uma transação é suspeita. |
-| `fraud-detector-lambda` | Consome a fila SQS, consulta o histórico do usuário no DynamoDB, aplica as regras de fraude, persiste o resultado e publica um alerta no SNS quando suspeita. |
-| **`fraud-detector-infra-aws`** (este repositório) | Terraform da infraestrutura compartilhada: tabelas DynamoDB, fila SQS, tópico SNS. |
+| `fraud-detector-api` | Java/Spring Boot API. Validates transactions and publishes them to SQS. It **never** decides whether a transaction is suspicious. |
+| `fraud-detector-lambda` | Consumes the SQS queue, queries the user's history in DynamoDB, applies fraud rules, persists the result, and publishes an SNS alert when suspicious. |
+| **`fraud-detector-infra-aws`** (this repository) | Terraform for the shared infrastructure: DynamoDB tables, SQS queue, and SNS topic. |
 
-Este repositório **não contém** a infraestrutura específica da Lambda (IAM role, função, trigger) — isso vive no próprio repositório `fraud-detector-lambda`, que referencia os recursos daqui por nome via Terraform data sources. Ver o `README.md` daquele repo para detalhes.
+This repository **does not contain** the Lambda-specific infrastructure (IAM role, function, and trigger). That infrastructure lives in the `fraud-detector-lambda` repository, which references these resources by name through Terraform data sources. See that repository's `README.md` for details.
 
-## O que este repositório cria
+## What This Repository Creates
 
-- **DynamoDB** — tabela `users` (chave `userId`) e tabela `transactions` (chave `transactionId`, com GSI `userId-occurredAt-index` para consultas de histórico por usuário/janela de tempo)
-- **SQS** — fila `transaction-queue` + dead letter queue, com redrive automático após 3 tentativas
-- **SNS** — tópico `fraud-alerts`, com uma assinatura de e-mail configurável
+- **DynamoDB** - `users` table (`userId` key) and `transactions` table (`transactionId` key, with the `userId-occurredAt-index` GSI for user history and time-window queries)
+- **SQS** - `transaction-queue` and dead-letter queue, with automatic redrive after 3 attempts
+- **SNS** - `fraud-alerts` topic, with a configurable email subscription
 
-## Estrutura
+## Structure
 
 ```
 terraform/
@@ -36,9 +36,9 @@ terraform/
 docker-compose.localstack.yml
 ```
 
-## Deploy para AWS real
+## Deploy to Real AWS
 
-Pré-requisitos: credenciais AWS configuradas (`aws configure` ou variáveis de ambiente), com permissão para criar DynamoDB, SQS, SNS **e IAM** de forma geral (a Lambda cria sua própria IAM role no repo dela, mas o usuário/role que roda o Terraform precisa poder gerenciar esses serviços).
+Prerequisites: AWS credentials configured (`aws configure` or environment variables), with permission to create DynamoDB, SQS, SNS, and **IAM** resources (the Lambda creates its own IAM role in its repository, but the user or role running Terraform must be allowed to manage these services).
 
 ```bash
 cd terraform
@@ -49,38 +49,38 @@ terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
 
-Depois do apply, confirme a assinatura do SNS — chega um e-mail com link de confirmação, e o alerta só funciona depois de clicado.
+After applying, confirm the SNS subscription. An email with a confirmation link will be sent, and alerts will only work after confirmation.
 
-⚠️ Certifique-se de que **não existe** `local_override.tf` na pasta antes de rodar isso — a presença desse arquivo redireciona o provider para o LocalStack, mesmo sem querer. Ver a seção abaixo.
+Make sure `local_override.tf` **does not exist** in the directory before running this. Its presence redirects the provider to LocalStack. See the section below.
 
-## Desenvolvimento local com LocalStack
+## Local Development with LocalStack
 
-O ambiente local executa o Terraform contra o LocalStack, sem criar recursos na sua conta AWS. O arquivo `local_override.tf` redireciona os serviços para `http://localhost:4566` e usa credenciais fictícias aceitas pelo LocalStack.
+The local environment runs Terraform against LocalStack without creating resources in your AWS account. The `local_override.tf` file redirects services to `http://localhost:4566` and uses dummy credentials accepted by LocalStack.
 
-### Pré-requisitos
+### Prerequisites
 
-- Docker Desktop em execução, com suporte ao Docker Compose
+- Docker Desktop running with Docker Compose support
 - Terraform `>= 1.7`
-- Git, para clonar o repositório
+- Git to clone the repository
 
-Não é necessário configurar credenciais AWS para executar o ambiente local.
+AWS credentials are not required for the local environment.
 
-### Subir a infraestrutura
+### Start the Infrastructure
 
-Na raiz do repositório, inicie o LocalStack:
+From the repository root, start LocalStack:
 
 ```bash
 docker compose -f docker-compose.localstack.yml up -d
 ```
 
-Confirme que o container está saudável:
+Confirm that the container is healthy:
 
 ```bash
 docker compose -f docker-compose.localstack.yml ps
 curl http://localhost:4566/_localstack/health
 ```
 
-Depois, crie os arquivos locais a partir dos exemplos e aplique a infraestrutura:
+Then create the local files from the examples and apply the infrastructure:
 
 ```bash
 cd terraform
@@ -93,18 +93,18 @@ terraform plan -var-file=local.tfvars
 terraform apply -var-file=local.tfvars
 ```
 
-No PowerShell, os comandos de cópia equivalentes são:
+In PowerShell, use these equivalent copy commands:
 
 ```powershell
 Copy-Item local_override.tf.example local_override.tf
 Copy-Item local.tfvars.example local.tfvars
 ```
 
-Os arquivos `local_override.tf`, `local.tfvars`, o state do Terraform e os dados do LocalStack são locais e já estão protegidos pelo `.gitignore`. Nunca preencha arquivos `.example` com credenciais ou e-mails reais antes de publicá-los.
+The `local_override.tf`, `local.tfvars`, Terraform state, and LocalStack data files are local and already protected by `.gitignore`. Never add real credentials or email addresses to `.example` files before publishing them.
 
-### Conferir os recursos
+### Inspect the Resources
 
-Após o `apply`, consulte os outputs gerados pelo Terraform:
+After `apply`, inspect the Terraform outputs:
 
 ```bash
 terraform output
@@ -114,7 +114,7 @@ terraform output transactions_table_name
 terraform output fraud_alerts_topic_arn
 ```
 
-Também é possível verificar os serviços diretamente no LocalStack usando a AWS CLI com credenciais fictícias:
+You can also inspect the services directly in LocalStack using the AWS CLI with dummy credentials:
 
 ```bash
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 aws dynamodb list-tables --endpoint-url=http://localhost:4566
@@ -122,9 +122,9 @@ AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 a
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 aws sns list-topics --endpoint-url=http://localhost:4566
 ```
 
-### Parar e recriar
+### Stop and Recreate
 
-Para remover os recursos Terraform e parar o LocalStack:
+To remove the Terraform resources and stop LocalStack:
 
 ```bash
 terraform destroy -var-file=local.tfvars
@@ -132,26 +132,26 @@ cd ..
 docker compose -f docker-compose.localstack.yml down
 ```
 
-Para apagar também os dados persistidos pelo LocalStack, remova a pasta `.localstack/` depois de parar o container. Na próxima execução, o ambiente será criado do zero.
+To also delete data persisted by LocalStack, remove the `.localstack/` directory after stopping the container. The environment will be recreated from scratch on the next run.
 
-Para voltar a apontar para a AWS real, remova `local_override.tf` antes de executar o Terraform. Use o fluxo de deploy da seção anterior e nunca execute `terraform apply` com o override local presente.
+To point to real AWS again, remove `local_override.tf` before running Terraform. Use the deployment flow from the previous section and never run `terraform apply` while the local override is present.
 
-**Ordem de apply entre repositórios**: este repositório precisa ser aplicado **antes** do `fraud-detector-lambda`, já que a Lambda busca a fila, as tabelas e o tópico por nome via data source. Se eles ainda não existirem, o apply da Lambda falha com um erro de recurso não encontrado.
+**Apply order between repositories**: this repository must be applied **before** `fraud-detector-lambda`, because the Lambda looks up the queue, tables, and topic by name through data sources. If they do not exist yet, the Lambda apply fails with a resource-not-found error.
 
-## Variáveis
+## Variables
 
-| Variável | Descrição | Obrigatória |
+| Variable | Description | Required |
 |---|---|---|
-| `aws_region` | Região AWS | Não (default `us-east-1`) |
-| `environment` | `dev` ou `prod` | Sim |
-| `project_name` | Prefixo usado em todos os nomes de recurso | Não (default `fraud-detector`) |
-| `alert_email` | E-mail que recebe os alertas de fraude | Sim |
+| `aws_region` | AWS region | No (default `us-east-1`) |
+| `environment` | `dev` or `prod` | Yes |
+| `project_name` | Prefix used in all resource names | No (default `fraud-detector`) |
+| `alert_email` | Email address that receives fraud alerts | Yes |
 
-`project_name` e `environment` **precisam ser idênticos** aos usados no `fraud-detector-lambda` — é assim que os data sources daquele repositório encontram os recursos criados aqui.
+`project_name` and `environment` **must exactly match** the values used in `fraud-detector-lambda`. This is how that repository's data sources find the resources created here.
 
 ## Outputs
 
-Depois do apply, use `terraform output` para pegar os valores que a API e a Lambda precisam configurar (URL da fila, nomes das tabelas, ARN do tópico):
+After applying, use `terraform output` to get the values required by the API and Lambda (queue URL, table names, and topic ARN):
 
 ```bash
 terraform output transaction_queue_url
@@ -160,6 +160,6 @@ terraform output transactions_table_name
 terraform output fraud_alerts_topic_arn
 ```
 
-## Sobre o `.gitignore`
+## About `.gitignore`
 
-`*.tfvars` (exceto os `.example`), `local_override.tf` (exceto o `.example`) e o state (`*.tfstate*`) nunca são commitados — todos contêm valores sensíveis ou específicos da sua máquina (e-mail real, credenciais, estado da infra provisionada). Só os arquivos `.example` são versionados, servindo de modelo para qualquer pessoa (inclusive você, depois de um tempo) saber o que precisa preencher.
+`*.tfvars` (except `.example` files), `local_override.tf` (except the `.example` file), and Terraform state files (`*.tfstate*`) are never committed. They may contain sensitive or machine-specific values such as real email addresses, credentials, and provisioned infrastructure state. Only the `.example` files are versioned as templates.
