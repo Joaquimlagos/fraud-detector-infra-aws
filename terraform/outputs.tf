@@ -23,6 +23,21 @@ output "transaction_dlq_url" {
   value       = aws_sqs_queue.transaction_dlq.url
 }
 
+output "suspicious_transactions_queue_url" {
+  description = "URL da fila de transações suspeitas"
+  value       = aws_sqs_queue.suspicious_transactions.url
+}
+
+output "suspicious_transactions_queue_arn" {
+  description = "ARN da fila de transações suspeitas"
+  value       = aws_sqs_queue.suspicious_transactions.arn
+}
+
+output "suspicious_transactions_dlq_url" {
+  description = "URL da dead letter queue de transações suspeitas"
+  value       = aws_sqs_queue.suspicious_transactions_dlq.url
+}
+
 output "fraud_alerts_topic_arn" {
   description = "ARN do tópico de alertas de fraude"
   value       = aws_sns_topic.fraud_alerts.arn

@@ -10,14 +10,14 @@ The system is divided into three repositories:
 |---|---|
 | `fraud-detector-api` | Java/Spring Boot API. Validates transactions and publishes them to SQS. It **never** decides whether a transaction is suspicious. |
 | `fraud-detector-lambda` | Consumes the SQS queue, queries the user's history in DynamoDB, applies fraud rules, persists the result, and publishes an SNS alert when suspicious. |
-| **`fraud-detector-infra-aws`** (this repository) | Terraform for the shared infrastructure: DynamoDB tables, SQS queue, and SNS topic. |
+| **`fraud-detector-infra-aws`** (this repository) | Terraform for the shared infrastructure: DynamoDB tables, SQS queues, and SNS topic. |
 
 This repository **does not contain** the Lambda-specific infrastructure (IAM role, function, and trigger). That infrastructure lives in the `fraud-detector-lambda` repository, which references these resources by name through Terraform data sources. See that repository's `README.md` for details.
 
 ## What This Repository Creates
 
 - **DynamoDB** - `users` table (`userId` key) and `transactions` table (`transactionId` key, with the `userId-occurredAt-index` GSI for user history and time-window queries)
-- **SQS** - `transaction-queue` and dead-letter queue, with automatic redrive after 3 attempts
+- **SQS** - `transaction-queue` and `suspicious-transactions-queue`, each with a dead-letter queue and automatic redrive after 3 attempts
 - **SNS** - `fraud-alerts` topic, with a configurable email subscription
 
 ## Structure
@@ -109,6 +109,10 @@ After `apply`, inspect the Terraform outputs:
 ```bash
 terraform output
 terraform output transaction_queue_url
+terraform output transaction_queue_arn
+terraform output suspicious_transactions_queue_url
+terraform output suspicious_transactions_queue_arn
+terraform output suspicious_transactions_dlq_url
 terraform output users_table_name
 terraform output transactions_table_name
 terraform output fraud_alerts_topic_arn
@@ -155,6 +159,10 @@ After applying, use `terraform output` to get the values required by the API and
 
 ```bash
 terraform output transaction_queue_url
+terraform output transaction_queue_arn
+terraform output suspicious_transactions_queue_url
+terraform output suspicious_transactions_queue_arn
+terraform output suspicious_transactions_dlq_url
 terraform output users_table_name
 terraform output transactions_table_name
 terraform output fraud_alerts_topic_arn
